@@ -374,6 +374,87 @@ def main(
                     arcann_logger.critical(
                         f"MACE Compress - '{nnp}' NOT launched - No job file."
                     )
+    #TODO Could incorporate the franken inside the mace one
+    elif nnp_program == "franken":
+        for lmp_input in (training_path / "user_files").glob("*.in"):
+                    needed_mace_styles.add(
+                        LAMMPSInputHandler(
+                            lmp_input,
+                            [
+                                main_json["properties"][element]["symbol"]
+                                for element in main_json["properties"]
+                            ],
+                        ).lmp_pair
+                    )
+        for nnp in range(1, main_json["nnp_count"] + 1):  
+            local_path = current_path / f"{nnp}" / "FRANKEN_models"
+
+            job_file = replace_in_slurm_file_general(
+                master_job_file,
+                machine_spec,
+                walltime_approx_s,
+                machine_walltime_format,
+                current_input_json["job_email"],
+            )
+            # Replace the inputs/variables in the job file
+            job_file = replace_substring_in_string_list(
+                job_file,
+                "_R_FRANKEN_MODEL_FILE_",
+                f"model_{nnp}_{padded_curr_iter}.pt",
+            )
+            system_atoms = [
+                main_json["properties"][element]["symbol"]
+                for element in main_json["properties"]
+            ]
+            elements = load_json_file(
+                deepmd_iterative_path / "assets" / "elements.json"
+            )
+            system_nbs = [
+                elm["atomic_number"]
+                for elm in elements.values()
+                if elm["symbol"] in system_atoms
+            ]
+            job_file = replace_substring_in_string_list(
+                job_file,
+                "_R_ATOMIC_NUMBERS_",
+                " ".join([str(num) for num in system_nbs]),
+            )
+            job_file = replace_substring_in_string_list(
+                job_file,
+                "_R_CHEMICAL_SYMBOLS_",
+                " ".join(system_atoms),
+            )
+            job_path = (
+                local_path
+                / f"job_franken_compress_{machine_spec['arch_type']}_{machine}.sh"
+            )
+
+            string_list_to_textfile(
+                job_path,
+                job_file,
+                read_only=True,
+            )
+
+            if (job_path).is_file():
+                change_directory(local_path)
+                try:
+                    subprocess.run(  # noqa: S603
+                        [
+                            machine_launch_command,
+                            f"./job_franken_compress_{machine_spec['arch_type']}_{machine}.sh",
+                        ]
+                    )
+                    arcann_logger.info(f"FRANKEN Compress - '{nnp}' launched.")
+                    completed_count += 1
+                except FileNotFoundError:
+                    arcann_logger.critical(
+                        f"FRANKEN Compress - '{nnp}' NOT launched - '{machine_launch_command}' not found."
+                    )
+                change_directory(local_path.parent)
+            else:
+                arcann_logger.critical(
+                    f"FRANKEN Compress - '{nnp}' NOT launched - No job file."
+                )
 
     arcann_logger.info("-" * 88)
     # Update the boolean in the training JSON

@@ -74,9 +74,11 @@ def main(
                 check_file_existence(
                     local_path / f"graph_{nnp}_{padded_curr_iter}_compressed.pb"
                 )
-        elif nnp_program == "mace":
+        elif nnp_program in ("mace", "franken"):
             check_file_existence(
-                local_path / "MACE_models" / f"model_{nnp}_{padded_curr_iter}.model"
+                local_path
+                / ("MACE_models" if nnp_program == "mace" else "FRANKEN_models")
+                / (f"model_{nnp}_{padded_curr_iter}.model" if nnp_program == "mace" else f"model_{nnp}_{padded_curr_iter}.pt")
             )
 
     # Prepare the test folder
@@ -121,12 +123,16 @@ def main(
                     str((training_path / "NNP")),
                 ]
             )
-        elif nnp_program == "mace":
-            nnp_path = local_path / f"{nnp}" / "MACE_models"
+        elif nnp_program in ("mace", "franken"):
+            nnp_path = (
+                local_path
+                / f"{nnp}"
+                / ("MACE_models" if nnp_program == "mace" else "FRANKEN_models")
+            )
             if training_json["is_compressed"]:
                 for conv_mod in [
                     f
-                    for ext in ("json", "model", "model-lammps.pt", "-mliap_lammps.pt")
+                    for ext in ("pt","json", "model", "model-lammps.pt", "-mliap_lammps.pt")
                     for f in nnp_path.glob(f"model*.{ext}")
                 ]:
                     subprocess.run(  # noqa: S603
@@ -152,8 +158,8 @@ def main(
                     str(
                         local_path
                         / f"{nnp}"
-                        / "MACE_models"
-                        / f"model_{nnp}_{padded_curr_iter}.model"
+                        / ("MACE_models" if nnp_program == "mace" else "FRANKEN_models")
+                        / (f"model_{nnp}_{padded_curr_iter}.model" if nnp_program == "mace" else f"model_{nnp}_{padded_curr_iter}.pt")
                     ),
                     str((training_path / "NNP")),
                 ]

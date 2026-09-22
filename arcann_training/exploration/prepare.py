@@ -331,9 +331,9 @@ def main(
             f"{system_exploration_type, system_traj_count, system_timestep_ps, system_temperature_K, system_exp_time_ps, system_max_exp_time_ps, system_job_walltime_h, system_print_mult, system_previous_start, system_disturbed_start}"
         )
 
-        if nnp_program == "mace" and system_exploration_type != "lammps":
+        if nnp_program in ("mace", "franken") and system_exploration_type != "lammps":
             arcann_logger.error(
-                f"ArcaNN does not support MACE and {system_exploration_type.upper()}!"
+                f"ArcaNN does not support {nnp_program.upper()} and {system_exploration_type.upper()}!"
             )
             sys.exit(1)
 

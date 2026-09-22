@@ -159,13 +159,27 @@ def main(
             )
             arcann_logger.error("Aborting...")
             raise FileNotFoundError("MACE config file is missing from user_files.")
+    elif nnp_program == "franken":
+        if (
+            len(
+                list(user_files_path.glob("franken_*.yml"))
+                + list(user_files_path.glob("franken_*.yaml"))
+            )
+            == 0
+        ):
+            arcann_logger.error(
+                "FRANKEN config file (franken_FRANKENVERSION.yml) is missing from user_files."
+            )
+            arcann_logger.error("Aborting...")
+            raise FileNotFoundError("FRANKEN config file is missing from user_files.")
+
     else:
         arcann_logger.error(
-            f"NNP program: {nnp_program} not recognized. ArcaNN supports 'deepmd' or 'mace'."
+            f"NNP program: {nnp_program} not recognized. ArcaNN supports 'deepmd' or 'mace' or 'franken'."
         )
         arcann_logger.error("Aborting...")
         raise ValueError(
-            f"NNP program: {nnp_program} not recognized. ArcaNN supports 'deepmd' or 'mace'."
+            f"NNP program: {nnp_program} not recognized. ArcaNN supports 'deepmd' or 'mace' or 'franken'."
         )
 
     # Create the initial training directory

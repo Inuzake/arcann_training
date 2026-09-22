@@ -351,6 +351,60 @@ def main(
                 arcann_logger.error("Aborting...")
                 return 1
 
+    elif nnp_program == "franken":
+        # Check if the default input json file exists
+        franken_input_path = (
+            user_files_path / f"franken.yaml"
+        ).resolve()
+
+        if not franken_input_path.exists():
+            franken_input_path = (
+                user_files_path / f"franken.yaml"
+            ).resolve()
+
+        nnp_input = load_yaml_file(franken_input_path)
+
+        if "E0s" not in nnp_input or not isinstance(nnp_input["E0s"], dict):
+            arcann_logger.critical(
+                "It is HIGHLY recommanded when training MACE model, to do it by providing the energies of the isolated atoms."
+                "To do so, please provide these E0s by computing the energies of the isolated atoms with the same level of theory as the one used for the training dataset."
+            )
+        else:
+            e0_atoms = set(nnp_input["E0s"].keys())
+            system_atoms = [
+                main_json["properties"][element]["symbol"]
+                for element in main_json["properties"]
+            ]
+            elements = load_json_file(
+                deepmd_iterative_path / "assets" / "elements.json"
+            )
+            system_atoms = [
+                elm["atomic_number"]
+                for elm in elements.values()
+                if elm["symbol"] in system_atoms
+            ]
+            system_atoms = set(system_atoms)
+            if e0_atoms != system_atoms:
+                arcann_logger.error(
+                    f"The atoms provided for E0s don't match with the one on your systems. E0 atoms: {e0_atoms}, system atoms: {system_atoms}."
+                )
+                arcann_logger.error("Aborting...")
+                return 1
+        arcann_logger.debug(f"franken_input: {nnp_input}")
+
+        if "foundation_model" in nnp_input:
+                    fondation_path = (
+                        user_files_path / f"{nnp_input['foundation_model']}"
+                    ).resolve()
+                    if not fondation_path.is_file():
+                        arcann_logger.error(
+                            f"Foundation model file {nnp_input['foundation_model']} not found in user_files."
+                        )
+                        arcann_logger.error("Aborting...")
+                        return 1
+
+    # TO DO ADD NECESSITY OF FOUNDATION MODEL IN FRANKEN
+
     arcann_logger.debug(f"main_json: {main_json}")
 
     # Load the datasets that were previously processed
@@ -447,7 +501,7 @@ def main(
         nnp_input["training"]["validation_data"]["systems"] = [
             "data/" + ds for ds in dataset.validation_paths
         ]
-    elif nnp_program == "mace":
+    elif nnp_program == "mace" or nnp_program == "franken":
         nnp_input["train_file"] = "data/training_dataset.extxyz"
         nnp_input["valid_file"] = "data/validation_dataset.extxyz"
         nnp_input["test_file"] = "data/test_dataset.extxyz"
@@ -566,7 +620,7 @@ def main(
             )
         del train_dataset, valid_dataset, localdata_path
 
-    elif nnp_program == "mace":
+    elif nnp_program == "mace" or nnp_program == "franken":
         dataset.prepare_for_mace_train(data_path=localdata_path)
         if nnp_input.get("foundation_model"):
             foundation_model_path = (
@@ -668,13 +722,23 @@ def main(
                 nnp_input, mace_input_file, enable_logging=False, read_only=True
             )
 
+        elif nnp_program == "franken":
+            nnp_input["seed"] = int(f"{nnp}{random_0_1000}{padded_curr_iter}")
+            nnp_input["rng_seed"] = int(f"{nnp}{random_0_1000}{padded_curr_iter}")
+            nnp_input["model_name"] = f"model_{nnp}_{padded_curr_iter}"
+            nnp_input["model_dir"] = "FRANKEN_models"
+            franken_input_file = (Path(f"{nnp}") / "training.yaml").resolve()
+            write_yaml_file(
+                nnp_input, franken_input_file, enable_logging=False, read_only=True
+            )
+        
         job_file = replace_in_slurm_file_general(
             master_job_file,
             machine_spec,
             walltime_approx_s,
             machine_walltime_format,
             training_json["job_email"],
-        )
+        )  
 
         if nnp_program == "deepmd":
             # Replace the inputs/variables in the job file
@@ -714,6 +778,33 @@ def main(
                     f"../{nnp_input['foundation_model']}",
                 )
 
+        elif nnp_program == "franken":
+            # Replace the inputs/variables in the job file
+            job_file = replace_substring_in_string_list(
+                job_file, "_R_FRANKEN_INPUT_FILE_", "training.yaml"
+            )
+            job_file = replace_substring_in_string_list(
+                job_file, "_R_FRANKEN_OUTPUT_FILE_", "training.out"
+            )
+            job_file = replace_substring_in_string_list(
+                job_file, "_R_TRAIN_DATA_SET_", nnp_input["train_file"]
+            )
+            job_file = replace_substring_in_string_list(
+                job_file, "_R_VALID_DATA_SET_", nnp_input["valid_file"]
+            )
+            job_file = replace_substring_in_string_list(
+                job_file, "_R_SEED_", str(nnp_input["seed"])
+            )
+            job_file = replace_substring_in_string_list(
+                job_file, "_R_RNG_SEED_", str(nnp_input["rng_seed"])
+            )
+            if nnp_input.get("foundation_model"):
+                job_file = replace_substring_in_string_list(
+                    job_file,
+                    "_R_MACE_FONDATION_FILE_",
+                    f"../{nnp_input['foundation_model'].split('/')[-1]}",
+                )
+            
         string_list_to_textfile(
             local_path
             / f"job_{nnp_program}_train_{machine_spec['arch_type']}_{machine}.sh",

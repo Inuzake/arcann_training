@@ -1,0 +1,51 @@
+seed: 123
+
+E0s: "average"
+  #E0s: {
+  #  1: 0.0,
+    #  6: -0.0000000000000001,
+    #  7: -0.0000000000000001,
+    #  8: -0.0000000000000001,
+    #}
+model: "MACE"
+
+config_type_weights:
+  Default: 1.0
+
+foundation_model: "/lustre/fsn1/projects/rech/ihj/use32lq/NNP/MACE/FUND_MOD/mace-omat-0-medium.model"
+
+num_channels: 64
+max_L: 2
+r_max: 6.0
+num_interactions: 2
+correlation: 3
+
+name: _R_MACE_MODEL_NAME
+
+model_dir: "MACE_models"
+
+device: cuda
+default_dtype: "float64"
+save_cpu: no
+
+batch_size: 5
+max_num_epochs: 5
+lr: 1e-2
+
+forces_weight: 100
+energy_weight: 1
+energy_key: "AIMD_energy"
+forces_key: "AIMD_forces"
+
+swa: False
+ema: True
+ema_decay: 0.99
+amsgrad: True
+restart_latest: True
+
+scheduler_patience: 15
+patience: 20
+eval_interval: 1
+
+enable_cueq: False
+

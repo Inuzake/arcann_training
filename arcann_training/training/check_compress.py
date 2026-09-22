@@ -105,6 +105,25 @@ def main(
                         f"MACE Compress - '{nnp}-{str(style)}' not finished/failed."
                     )
 
+    elif nnp_program == "franken":
+        for lmp_input in (training_path / "user_files").glob("*.in"):
+                    needed_mace_styles.add(
+                        LAMMPSInputHandler(
+                            lmp_input,
+                            [
+                                main_json["properties"][element]["symbol"]
+                                for element in main_json["properties"]
+                            ],
+                        ).lmp_pair
+                    )
+        
+        for nnp in range(1, main_json["nnp_count"] + 1):
+            local_path = current_path / f"{nnp}" / "FRANKEN_models"
+            if (local_path / f"model_{nnp}_{padded_curr_iter}.model-lammps.pt").is_file():
+                completed_count += 1
+            else:
+                arcann_logger.critical(f"FRANKEN Compress - '{nnp}' not finished/failed.")
+
     arcann_logger.debug(f"completed_count: {completed_count}")
 
     if completed_count == main_json["nnp_count"] or (

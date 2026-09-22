@@ -14,6 +14,7 @@ import logging
 import re
 import sys
 from pathlib import Path
+import shutil
 
 # Non-standard imports
 import numpy as np
@@ -28,6 +29,7 @@ from arcann_training.common.json import (
 )
 from arcann_training.common.list import textfile_to_string_list
 from arcann_training.common.yaml import load_yaml_file
+from arcann_training.common.filesystem import check_directory
 
 
 def main(
@@ -99,12 +101,21 @@ def main(
             else None
         )
 
+    elif nnp_program == "franken":
+        training_input = (
+            load_yaml_file(current_path / "1" / "training.yaml")
+            if (current_path / "1" / "training.yaml").is_file()
+            else None
+        )
+
     for nnp in range(1, main_json["nnp_count"] + 1):
         local_path = current_path / f"{nnp}"
         if (local_path / "training.log").is_file():
             training_out = textfile_to_string_list((local_path / "training.log"))
         elif (local_path / "training.out").is_file():
             training_out = textfile_to_string_list((local_path / "training.out"))
+        elif (franken_logs := list(local_path.glob("*/run_*/franken.log"))):
+            training_out = textfile_to_string_list(franken_logs[0])
         else:
             training_out = []
         if training_out:
@@ -181,6 +192,19 @@ def main(
                 "Training complete" in s for s in training_out
             ):
                 completed_count += 1
+
+            elif nnp_program == "franken" and any(
+                "Saved best model" in s for s in training_out
+            ):
+                completed_count += 1
+                nnp_input = load_yaml_file(local_path / "training.yaml")
+                run_folder = next(s for s in training_out if "Run folder:" in s).split("Run folder:")[-1].strip()
+                model_folder = local_path / nnp_input["model_dir"]
+                model_folder.mkdir(exist_ok=True)
+                check_directory(model_folder)
+                for model_file in (local_path / run_folder).glob("*.pt"):
+                    shutil.move(model_file, model_folder / f"{nnp_input['model_name']}.pt")
+
             else:
                 arcann_logger.critical(f"DP Train - '{nnp}' not finished/failed.")
             del training_out
@@ -228,7 +252,7 @@ def main(
     # Update the boolean in the training JSON
     if completed_count == main_json["nnp_count"]:
         training_json["is_checked"] = True
-    if nnp_program == "mace":  # because we don't need them for mace
+    if nnp_program == "mace" or nnp_program == "franken":  # because we don't need them for mace
         training_json["is_freeze_launched"] = True
         training_json["is_frozen"] = True
 
@@ -243,7 +267,7 @@ def main(
         training_json["stdeviation_s_per_step"] = np.std(training_times) / np.average(
             step_sizes
         )
-    elif nnp_program == "mace":
+    elif nnp_program == "mace" or nnp_program == "franken":
         training_json["mean_s_per_step"] = 0.0
         training_json["median_s_per_step"] = 0.0
         training_json["stdeviation_s_per_step"] = 0.0
