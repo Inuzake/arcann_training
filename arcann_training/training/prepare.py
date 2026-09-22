@@ -793,6 +793,9 @@ def main(
                 job_file, "_R_VALID_DATA_SET_", nnp_input["valid_file"]
             )
             job_file = replace_substring_in_string_list(
+                job_file, "_R_TEST_DATA_SET_", nnp_input["test_file"]
+            )
+            job_file = replace_substring_in_string_list(
                 job_file, "_R_SEED_", str(nnp_input["seed"])
             )
             job_file = replace_substring_in_string_list(

@@ -49,6 +49,8 @@ MACE_CONDA_INSTALL="" #If you don't want to use a specific version of MACE, but 
 # Adapt the following lines to your HPC system
 #----------------------------------------------
 
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 # Go where the job has been launched
 cd "${SLURM_SUBMIT_DIR}" || { echo "Could not go to ${SLURM_SUBMIT_DIR}. Aborting..."; exit 1; }
 
@@ -65,7 +67,7 @@ module load arch/h100
 module load pytorch-gpu/py3/
 conda activate franken
 
-franken.autotune --train-path data/training_dataset.extxyz --val-path data/validation_dataset.extxyz --l2-penalty="(-11,-6,5,log)" --force-weight="(0.01,0.99,5,linear)" --metrics energy_MAE forces_MAE energy_RMSE forces_RMSE --seed 42 --ms-gaussian.rng-seed 1337 --jac-chunk-size "10" --run-dir "./results" --backbone=mace --mace.path-or-id "/lustre/fsn1/projects/rech/ihj/use32lq/NNP/MACE/FUND_MOD/mace-omat-0-medium.model" --mace.interaction-block 2 --rf=ms-gaussian --ms-gaussian.num-rf 16384 --ms-gaussian.length-scale-low 8.0 --ms-gaussian.length-scale-high 32.0 --ms-gaussian.length-scale-num 4
+franken.autotune --train-path _R_TRAIN_DATA_SET_ --val-path _R_VALID_DATA_SET_ --test-path _R_TEST_DATA_SET_ --l2-penalty="(-11,-6,5,log)" --force-weight="(0.01,0.99,5,linear)" --metrics energy_MAE forces_MAE energy_RMSE forces_RMSE --seed _R_SEED_ --ms-gaussian.rng-seed _R_RNG_SEED_ --jac-chunk-size "10"  --backbone=mace --mace.path-or-id _R_MACE_FONDATION_FILE_ --mace.interaction-block 2 --rf=ms-gaussian --ms-gaussian.num-rf 16384 --ms-gaussian.length-scale-low 8.0 --ms-gaussian.length-scale-high 32.0 --ms-gaussian.length-scale-num 4
 
 
 sleep 5

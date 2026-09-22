@@ -41,11 +41,12 @@
 #env | sort
 #echo '-</env>---------------------------------------------'
 
-MACE_MODEL_FILE="_R_MACE_MODEL_FILE_"
-MACE_MODEL_STYLE="_R_MACE_MODEL_STYLE_"
+FRANKEN_MODEL_FILE="_R_FRANKEN_MODEL_FILE_"
 
 #----------------------------------------------
 # Nothing needed to be changed past this point
+
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # Go where the job has been launched
 cd "${SLURM_SUBMIT_DIR}" || exit 1
@@ -55,7 +56,7 @@ module load arch/h100
 module load pytorch-gpu/py3/
 conda activate franken
 
-franken.wrap_mace_lammps --model_path=${MACE_MODEL_FILE}
+franken.wrap_mace_lammps --model_path=${FRANKEN_MODEL_FILE}
 
 
 sleep 5
