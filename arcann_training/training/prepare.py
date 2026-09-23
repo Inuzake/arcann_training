@@ -807,6 +807,14 @@ def main(
                     "_R_MACE_FONDATION_FILE_",
                     f"../{nnp_input['foundation_model'].split('/')[-1]}",
                 )
+            if "E0s" not in nnp_input or not isinstance(nnp_input["E0s"], dict):
+                job_file = replace_substring_in_string_list(
+                    job_file, "_R_ATOMIC_ENERGIES_", ""
+                )
+            else:
+                job_file = replace_substring_in_string_list(
+                    job_file, "_R_ATOMIC_ENERGIES_", f"--atomic-energies {nnp_input["E0s"]}"
+                )
             
         string_list_to_textfile(
             local_path

@@ -67,7 +67,7 @@ module load arch/h100
 module load pytorch-gpu/py3/
 conda activate franken
 
-franken.autotune --train-path _R_TRAIN_DATA_SET_ --val-path _R_VALID_DATA_SET_ --test-path _R_TEST_DATA_SET_ --l2-penalty="(-11,-6,5,log)" --force-weight="(0.01,0.99,5,linear)" --metrics energy_MAE forces_MAE energy_RMSE forces_RMSE --seed _R_SEED_ --ms-gaussian.rng-seed _R_RNG_SEED_ --jac-chunk-size "10"  --backbone=mace --mace.path-or-id _R_MACE_FONDATION_FILE_ --mace.interaction-block 2 --rf=ms-gaussian --ms-gaussian.num-rf 16384 --ms-gaussian.length-scale-low 8.0 --ms-gaussian.length-scale-high 32.0 --ms-gaussian.length-scale-num 4
+franken.autotune --train-path _R_TRAIN_DATA_SET_ --val-path _R_VALID_DATA_SET_ --test-path _R_TEST_DATA_SET_ --l2-penalty="(-11,-6,5,log)" --force-weight="(0.01,0.99,5,linear)" --metrics energy_MAE forces_MAE energy_RMSE forces_RMSE --seed _R_SEED_ --ms-gaussian.rng-seed _R_RNG_SEED_ --jac-chunk-size "10"  --backbone=mace --mace.path-or-id _R_MACE_FONDATION_FILE_ --mace.interaction-block 2 --rf=ms-gaussian --ms-gaussian.num-rf 16384 --ms-gaussian.length-scale-low 8.0 --ms-gaussian.length-scale-high 32.0 --ms-gaussian.length-scale-num 4 _R_ATOMIC_ENERGIES_
 
 
 sleep 5
