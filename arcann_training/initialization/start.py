@@ -162,8 +162,8 @@ def main(
     elif nnp_program == "franken":
         if (
             len(
-                list(user_files_path.glob("franken_*.yml"))
-                + list(user_files_path.glob("franken_*.yaml"))
+                list(user_files_path.glob("franken.yml"))
+                + list(user_files_path.glob("franken.yaml"))
             )
             == 0
         ):
