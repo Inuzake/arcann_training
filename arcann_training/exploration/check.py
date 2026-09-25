@@ -196,7 +196,7 @@ def main(
                             / f"model_devi_{system_auto}_{it_nnp}_{padded_curr_iter}.out"
                         )
                         check_list.append(model_deviation_filename)
-                    elif nnp_program == "mace":
+                    elif nnp_program in ("mace", "franken"):
                         check_list += [
                             local_path / f"{system_auto}_mace_forces_model{i}.lammpstrj"
                             for i in range(1, main_json["nnp_count"] + 1)

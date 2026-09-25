@@ -799,7 +799,7 @@ def create_models_list(
     models_list = []
 
     # Generate list of model file names
-    if pair_style is not None and nnp_program == "mace":
+    if pair_style is not None and nnp_program in ("mace", "franken"):
         nnp_path = training_path / Path("NNP")
         for nnp in reorder_nnp_list:
             model_name = f"model_{nnp}_{padded_prev_iter}"
