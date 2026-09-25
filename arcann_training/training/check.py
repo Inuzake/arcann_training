@@ -114,7 +114,7 @@ def main(
             training_out = textfile_to_string_list((local_path / "training.log"))
         elif (local_path / "training.out").is_file():
             training_out = textfile_to_string_list((local_path / "training.out"))
-        elif (franken_logs := list(local_path.glob("*/run_*/franken.log"))):
+        elif (franken_logs := list(local_path.glob("run_*/franken.log"))):
             training_out = textfile_to_string_list(franken_logs[0])
         else:
             training_out = []
