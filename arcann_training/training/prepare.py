@@ -813,7 +813,7 @@ def main(
                 )
             else:
                 job_file = replace_substring_in_string_list(
-                    job_file, "_R_ATOMIC_ENERGIES_", f"--atomic-energies {nnp_input["E0s"]}"
+                    job_file, "_R_ATOMIC_ENERGIES_", f'--atomic-energies "{nnp_input["E0s"]}"'
                 )
             
         string_list_to_textfile(
