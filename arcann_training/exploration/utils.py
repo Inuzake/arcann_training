@@ -805,12 +805,12 @@ def create_models_list(
         nnp_path = training_path / Path("NNP")
         for nnp in reorder_nnp_list:
             model_name = f"model_{nnp}_{padded_prev_iter}"
-            model_path = nnp_path.resolve() / Path(model_name + ".model")
+            model_path = nnp_path.resolve() / Path(model_name)
             # * Probably better to move it later to another place so converting is handled separately
             match pair_style:
                 case LAMMPSPair.MACE:
                     md_ext = "-lammps.pt"
-                    if not model_path.with_name(model_path.name + md_ext).is_file():
+                    if not model_path.with_name(model_path.name + ".model" + md_ext).is_file() and not model_path.with_name(model_path.name + md_ext).is_file():
                         arcann_logger.info(
                             f"Converting model to MACE-libtorch: {str(model_path)}"
                         )
