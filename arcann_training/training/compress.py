@@ -376,6 +376,17 @@ def main(
                     )
     #TODO Could incorporate the franken inside the mace one
     elif nnp_program == "franken":
+        franken_input_path = (
+            current_path / "1" / f"training.yaml"
+        ).resolve()
+
+        if not franken_input_path.exists():
+            franken_input_path = (
+                current_path / "1" / f"training.yaml"
+            ).resolve()
+
+        nnp_input = load_yaml_file(franken_input_path)
+    
         for lmp_input in (training_path / "user_files").glob("*.in"):
                     needed_mace_styles.add(
                         LAMMPSInputHandler(
@@ -402,27 +413,10 @@ def main(
                 "_R_FRANKEN_MODEL_FILE_",
                 f"model_{nnp}_{padded_curr_iter}.pt",
             )
-            system_atoms = [
-                main_json["properties"][element]["symbol"]
-                for element in main_json["properties"]
-            ]
-            elements = load_json_file(
-                deepmd_iterative_path / "assets" / "elements.json"
-            )
-            system_nbs = [
-                elm["atomic_number"]
-                for elm in elements.values()
-                if elm["symbol"] in system_atoms
-            ]
             job_file = replace_substring_in_string_list(
                 job_file,
-                "_R_ATOMIC_NUMBERS_",
-                " ".join([str(num) for num in system_nbs]),
-            )
-            job_file = replace_substring_in_string_list(
-                job_file,
-                "_R_CHEMICAL_SYMBOLS_",
-                " ".join(system_atoms),
+                "_R_BACKBONE_PATH_",
+                f"{current_path}/{nnp_input["foundation_model"]}",
             )
             job_path = (
                 local_path

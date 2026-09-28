@@ -798,6 +798,8 @@ def create_models_list(
 
     models_list = []
 
+    # MAY NEED TO CHANCHE HERE TO ADD FRANKEN
+    
     # Generate list of model file names
     if pair_style is not None and nnp_program in ("mace", "franken"):
         nnp_path = training_path / Path("NNP")

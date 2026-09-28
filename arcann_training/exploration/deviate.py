@@ -318,7 +318,7 @@ def main(
                             "exploration_type"
                         ]
                         == "lammps"
-                        and nnp_program == "mace"
+                        and nnp_program in ("mace", "franken")
                     ):
                         # Dimension NNP x Step x N x 3
                         mace_rerun_forces = np.array(
