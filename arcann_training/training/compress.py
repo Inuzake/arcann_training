@@ -35,7 +35,7 @@ from arcann_training.common.machine import (
     get_machine_spec_for_step,
 )
 from arcann_training.common.slurm import replace_in_slurm_file_general
-
+from arcann_training.common.yaml import load_yaml_file
 
 def main(
     current_step: str,
@@ -416,7 +416,7 @@ def main(
             job_file = replace_substring_in_string_list(
                 job_file,
                 "_R_BACKBONE_PATH_",
-                f"{current_path}/{nnp_input["foundation_model"]}",
+                f"{nnp_input["foundation_model"]}",
             )
             job_path = (
                 local_path

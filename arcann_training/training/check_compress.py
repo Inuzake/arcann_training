@@ -119,7 +119,7 @@ def main(
         
         for nnp in range(1, main_json["nnp_count"] + 1):
             local_path = current_path / f"{nnp}" / "FRANKEN_models"
-            if (local_path / f"model_{nnp}_{padded_curr_iter}.model-lammps.pt").is_file():
+            if (local_path / f"model_{nnp}_{padded_curr_iter}-lammps.pt").is_file():
                 completed_count += 1
             else:
                 arcann_logger.critical(f"FRANKEN Compress - '{nnp}' not finished/failed.")
