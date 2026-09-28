@@ -127,6 +127,9 @@ def main(
     nnp_program: str = main_json["nnp_program"]
 
     arcann_logger.info(f"Using {nnp_program} as NNP software")
+    if nnp_program == "franken":
+        nnp_program = "mace"
+        arcann_logger.info("Using franken as mace from this point")
     arcann_logger.info("-" * 88)
 
     # Load the previous exploration and training JSON
